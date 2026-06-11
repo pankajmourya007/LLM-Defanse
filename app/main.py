@@ -22,6 +22,28 @@ async def lifespan(app: FastAPI):
     await check_and_create_tables()
     await RateLimiter.init()
     
+    # Seed default user if database is empty
+    from app.database.db import AsyncSessionLocal
+    from app.models.user import User
+    from app.services.auth import hash_password
+    from sqlalchemy.future import select
+    
+    async with AsyncSessionLocal() as db:
+        try:
+            result = await db.execute(select(User))
+            if not result.scalars().first():
+                logger.info("No users found. Seeding default credentials...")
+                default_user = User(
+                    username="admin",
+                    hashed_password=hash_password("admin123"),
+                    is_active=True
+                )
+                db.add(default_user)
+                await db.commit()
+                logger.info("Seeded default test account successfully: admin / admin123")
+        except Exception as e:
+            logger.error(f"Failed to seed default credentials: {e}")
+            
     yield
     # Shutdown actions (if any)
     logger.info("Shutting down LLM-Defanc Security Gateway...")
