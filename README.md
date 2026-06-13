@@ -1,5 +1,6 @@
 # LLM-Defanc
 
+
 ## Enterprise LLM & GenAI Security Gateway
 
 LLM-Defanc is an AI Security Gateway designed to protect Large Language Model (LLM) interactions from data leakage, prompt injection attacks, and policy violations.
